@@ -1,0 +1,77 @@
+CREATE DATABASE CEMENTERIO;
+
+USE CEMENTERIO;
+
+CREATE TABLE sucursales (
+    id_sucursal INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    direccion TEXT,
+    telefono VARCHAR(20)
+);
+
+CREATE TABLE tipos_entierro (
+    id_tipo INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_tipo VARCHAR(50) NOT NULL, -- Cremación, Féretro, Nicho, etc.
+    descripcion TEXT
+);
+
+-- 2. Personas (Clientes y Empleados)
+CREATE TABLE clientes (
+    id_cliente INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    dni_cedula VARCHAR(20) UNIQUE,
+    telefono VARCHAR(20),
+    email VARCHAR(100)
+);
+
+CREATE TABLE empleados (
+    id_empleado INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    puesto VARCHAR(50),
+    id_sucursal INT,
+    FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal)
+);
+
+-- 3. Infraestructura (Lotes/Lápidas)
+CREATE TABLE lotes (
+    id_lote INT PRIMARY KEY AUTO_INCREMENT,
+    codigo_ubicacion VARCHAR(50) UNIQUE, -- Ej: SEC-A-Fila3-L4
+    estado ENUM('Disponible', 'Ocupado', 'Reservado', 'Mantenimiento'),
+    id_sucursal INT,
+    FOREIGN KEY (id_sucursal) REFERENCES sucursales(id_sucursal)
+);
+
+-- 4. El registro central: Difuntos
+CREATE TABLE difuntos (
+    id_difunto INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_completo VARCHAR(150) NOT NULL,
+    fecha_nacimiento DATE,
+    fecha_fallecimiento DATE,
+    id_lote INT,
+    id_tipo_entierro INT,
+    id_cliente_responsable INT,
+    FOREIGN KEY (id_lote) REFERENCES lotes(id_lote),
+    FOREIGN KEY (id_tipo_entierro) REFERENCES tipos_entierro(id_tipo),
+    FOREIGN KEY (id_cliente_responsable) REFERENCES clientes(id_cliente)
+);
+
+-- 5. Parte Financiera
+CREATE TABLE precios_servicios (
+    id_servicio INT PRIMARY KEY AUTO_INCREMENT,
+    concepto VARCHAR(100),
+    monto DECIMAL(10, 2) NOT NULL
+);
+
+CREATE TABLE transacciones (
+    id_transaccion INT PRIMARY KEY AUTO_INCREMENT,
+    fecha_pago TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_cliente INT,
+    id_empleado INT,
+    id_servicio INT,
+    total_pagado DECIMAL(10, 2),
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado),
+    FOREIGN KEY (id_servicio) REFERENCES precios_servicios(id_servicio)
+);
+
+
